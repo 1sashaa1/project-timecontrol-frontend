@@ -1,0 +1,51 @@
+.sidebar {
+    position: fixed;
+    width: 220px;
+    background-color: #1e1e2f;
+    color: #fff;
+    height: 100vh;
+    padding: 20px;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-title {
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+    font-weight: bold;
+    text-align: center;
+    color: #f0f0f0;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar-nav li {
+    display: flex;
+    align-items: center;
+    padding: 12px 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.sidebar-nav li:hover {
+    background-color: #2a2a3d;
+}
+
+.icon {
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+
+/* Примерные классы иконок — можно заменить на FontAwesome или SVG */
+.icon-dashboard::before { content: "📊"; }
+.icon-stats::before { content: "📈"; }
+.icon-archive::before { content: "🗂️"; }
+.icon-chat::before { content: "💬"; }
+.icon-inbox::before { content: "📥"; }
+.icon-settings::before { content: "⚙️"; }
