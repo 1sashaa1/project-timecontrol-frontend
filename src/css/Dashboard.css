@@ -25,6 +25,19 @@
     background-color: #d32f2f;
 }
 
+.admin-btn {
+    background-color: #a5a4a4;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.admin-btn:hover {
+    background-color: #979696;
+}
+
 .task-section {
     display: flex;
     flex-direction: column;
@@ -122,4 +135,53 @@
 }
 .dashboard-layout {
     display: flex;
+}
+
+.search-row {
+    margin-bottom: 15px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+.filters-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap; /* Чтобы не ломалось на маленьких экранах */
+}
+
+/* Выпадающие списки */
+.filter-select {
+    padding: 7px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+}
+
+/* Даты в одной строке с подписью */
+.filter-group-inline {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group-inline label {
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: #555;
+}
+
+.filter-date {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
 }

@@ -10,24 +10,24 @@ function TaskItem({ task, onStatusChange, onDelete }) {
             case "planned":
                 return (
                     <button onClick={() => handleClick("in_progress")} className="status-btn start">
-                        Start
+                        Начать
                     </button>
                 );
             case "in_progress":
                 return (
                     <>
                         <button onClick={() => handleClick("done")} className="status-btn done">
-                            Finish
+                            Завершить
                         </button>
                         <button onClick={() => handleClick("planned")} className="status-btn back">
-                            Back to Planned
+                            Вернуться к запланированному
                         </button>
                     </>
                 );
             case "done":
                 return (
                     <button onClick={() => handleClick("in_progress")} className="status-btn reopen">
-                        Reopen
+                        Открыть заново
                     </button>
                 );
             default:
@@ -41,15 +41,15 @@ function TaskItem({ task, onStatusChange, onDelete }) {
                 <h3>{task.title}</h3>
                 <p>{task.description}</p>
                 <p className="task-meta">
-                    Status: <strong>{task.status ?? "planned"}</strong> |
-                    Priority: <strong>{task.priority ?? "normal"}</strong>
+                    Статус: <strong>{task.status ?? "planned"}</strong> |
+                    Приоритет: <strong>{task.priority ?? "normal"}</strong>
                 </p>
             </div>
 
             <div className="task-actions">
                 {renderButton()}
                 <button className="delete-btn" onClick={() => onDelete(task.id)}>
-                    Delete
+                    Удалить
                 </button>
             </div>
         </li>

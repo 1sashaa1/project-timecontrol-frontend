@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {logout, register} from "../services/authService";
+import {logout, register} from "../services/AuthService";
 import { useNavigate } from "react-router-dom";
 
 function RegisterForm() {
@@ -18,10 +18,10 @@ function RegisterForm() {
             setError("");
             await register(registerData);
 
-            alert("Registration successful");
+            alert("Регистрация прошла успешно!");
             navigate("/");
         } catch (err) {
-            setError(err.response?.data || "Registration failed");
+            setError(err.response?.data || "Регистрация не осуществлена...");
         }
     };
 
@@ -34,7 +34,7 @@ function RegisterForm() {
             <form className="auth-form" onSubmit={handleSubmit}>
                 <input
                     className="auth-input"
-                    placeholder="Login"
+                    placeholder="Логин"
                     value={registerData.login}
                     onChange={(e) =>
                         setRegisterData({ ...registerData, login: e.target.value })
@@ -53,7 +53,7 @@ function RegisterForm() {
                 <input
                     className="auth-input"
                     type="password"
-                    placeholder="Password"
+                    placeholder="Пароль"
                     value={registerData.password}
                     onChange={(e) =>
                         setRegisterData({ ...registerData, password: e.target.value })

@@ -22,7 +22,7 @@
 
 /* Все input */
 .profile-container input {
-    width: 100%;
+    width: 90%;
     padding: 10px 12px;
     border: 1px solid #ccc;
     border-radius: 8px;
@@ -38,6 +38,7 @@
 
 /* Кнопка submit */
 .profile-container button {
+    margin-top: 10px;
     width: 100%;
     padding: 12px;
     border: none;
@@ -58,4 +59,31 @@
     font-size: 14px;
     margin-top: -5px;
     margin-bottom: 10px;
+}
+
+.profile-select {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    font-size: 16px;
+    font-family: inherit;
+    color: #333;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    appearance: none; /* убираем стандартный треугольник */
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='10' height='6' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23333'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 10px 6px;
+}
+
+.profile-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+    outline: none;
+}
+
+.profile-select option {
+    padding: 8px;
 }

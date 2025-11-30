@@ -1,0 +1,123 @@
+/* Общий контейнер */
+.admin-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+/* Заголовок */
+.admin-title {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Форма создания/редактирования */
+.admin-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 30px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+}
+
+.admin-form input,
+.admin-form select {
+    flex: 1 1 200px;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.admin-form button {
+    padding: 10px 20px;
+    background-color: #4caf50;
+    border: none;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.admin-form button:hover {
+    background-color: #45a049;
+}
+
+/* Кнопка отмены */
+.admin-form button[type="button"] {
+    background-color: #f44336;
+}
+
+.admin-form button[type="button"]:hover {
+    background-color: #d73833;
+}
+
+/* Таблица */
+.admin-table-wrapper {
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.admin-table th,
+.admin-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.admin-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+/* Строки таблицы */
+.admin-table tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+.admin-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Кнопки действий */
+.admin-table button {
+    margin-right: 5px;
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.admin-table button:hover {
+    opacity: 0.8;
+}
+
+.admin-table button.delete {
+    background-color: #f44336;
+    color: white;
+}
+
+.admin-table button.edit {
+    background-color: #2196f3;
+    color: white;
+}
+
+/* Загрузка */
+.admin-loading {
+    text-align: center;
+    font-size: 16px;
+    color: #555;
+    margin-top: 50px;
+}

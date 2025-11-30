@@ -1,11 +1,11 @@
 import React, { useState, useContext } from "react";
-import { login } from "../services/authService";
+import {login, saveUserInfo} from "../services/AuthService";
 import { AuthContext } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import "../App.css"; // подключаем CSS
 
 export default function LoginForm() {
-    const { saveToken } = useContext(AuthContext);
+    const { saveToken, saveRefreshToken } = useContext(AuthContext);
     const navigate = useNavigate();
     const [loginData, setLoginData] = useState({ login: "", password: "" });
     const [error, setError] = useState("");
@@ -15,6 +15,9 @@ export default function LoginForm() {
         try {
             const response = await login(loginData);
             saveToken(response.data.token);
+            saveRefreshToken(response.data.refreshToken);
+            saveUserInfo(response.data.id, response.data.username, response.data.role);
+
             setError("");
             if (!response.data.profileCompleted) {
                 navigate("/complete-profile");
@@ -22,7 +25,7 @@ export default function LoginForm() {
                 navigate("/dashboard");
             }
         } catch (err) {
-            setError("Invalid login or password");
+            setError("Неверный логин или пароль");
         }
     };
 
@@ -33,14 +36,14 @@ export default function LoginForm() {
             <form className="auth-form" onSubmit={handleSubmit}>
                 <input
                     className="auth-input"
-                    placeholder="Login"
+                    placeholder="Логин"
                     value={loginData.login}
                     onChange={e => setLoginData({...loginData, login: e.target.value})}
                 />
                 <input
                     className="auth-input"
                     type="password"
-                    placeholder="Password"
+                    placeholder="Пароль"
                     value={loginData.password}
                     onChange={e => setLoginData({...loginData, password: e.target.value})}
                 />
