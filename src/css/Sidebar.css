@@ -1,51 +1,57 @@
 .sidebar {
-    position: fixed;
-    width: 220px;
-    background-color: #1e1e2f;
+    width: 240px;
+    padding: 20px;
+    background: #1f1f1f;
     color: #fff;
     height: 100vh;
-    padding: 20px;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
-    display: flex;
-    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    overflow-y: auto;
 }
 
+
 .sidebar-title {
-    font-size: 1.5rem;
-    margin-bottom: 30px;
+    font-size: 20px;
     font-weight: bold;
-    text-align: center;
-    color: #f0f0f0;
+    margin-bottom: 20px;
 }
 
 .sidebar-nav ul {
     list-style: none;
     padding: 0;
+    margin: 0;
 }
 
-.sidebar-nav li {
+.sidebar-link {
     display: flex;
     align-items: center;
-    padding: 12px 10px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.3s ease;
+    gap: 12px;
+    padding: 10px 8px;
+    color: #ddd;
+    text-decoration: none;
+    border-radius: 6px;
 }
 
-.sidebar-nav li:hover {
-    background-color: #2a2a3d;
+.sidebar-link:hover {
+    background: #1a2259;
+    color: #fff;
+}
+
+.sidebar-link.active {
+    background: #4a66f7;
+    color: #fff;
 }
 
 .icon {
-    margin-right: 10px;
-    font-size: 1.2rem;
+    font-size: 20px;
 }
 
-/* Примерные классы иконок — можно заменить на FontAwesome или SVG */
-.icon-dashboard::before { content: "📊"; }
-.icon-stats::before { content: "📈"; }
-.icon-archive::before { content: "🗂️"; }
-.icon-chat::before { content: "💬"; }
-.icon-inbox::before { content: "📥"; }
-.icon-settings::before { content: "⚙️"; }
+
+.sidebar-nav a {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}

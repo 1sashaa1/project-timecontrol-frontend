@@ -78,3 +78,16 @@
 .btn-submit:hover {
     background: #005fcc;
 }
+
+.status-input {
+    width: 20%;
+    height: 20%;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    outline: none;
+    background: #fafafa;
+    font-size: 14px;
+    transition: 0.25s;
+    padding: 5px;
+}
+

@@ -6,7 +6,7 @@ import {
     retrieveAllTasks,
     createTask,
     updateStatus,
-    deleteTask
+    deleteTask, updateTask
 } from "../services/TaskService";
 import { getUserId } from "../services/EmployeeService";
 import "../css/Dashboard.css";
@@ -14,6 +14,8 @@ import * as XLSX from "xlsx";
 import Sidebar from "../components/Sidebar";
 import {isAdmin} from "../services/AuthService";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../components/ToastContext";
+
 
 function Dashboard() {
     const { logout } = useContext(AuthContext);
@@ -25,7 +27,8 @@ function Dashboard() {
     const [priorityFilter, setPriorityFilter] = useState("");
     const [dateFrom, setDateFrom] = useState("");
     const [dateTo, setDateTo] = useState("");
-
+    const { showToast } = useToast();
+    const [editingTask, setEditingTask] = useState(null);
 
     const userId = getUserId();
 
@@ -54,31 +57,59 @@ function Dashboard() {
         }
     }, [tasks, loading]);
 
-    const handleCreate = async task => {
-        try {
-            await createTask(userId, userId, task);
-            fetchTasks();
-        } catch (err) {
-            console.error("Error creating task:", err);
+    const handleCreateOrUpdate = async (task) => {
+        if (editingTask) {
+            if (!window.confirm("Сохранить изменения задачи?")) return;
+            try {
+                await updateTask(task, editingTask.id);
+                fetchTasks();
+                showToast("Задача успешно обновлена!", "success");
+                setEditingTask(null); // сброс состояния редактирования
+            } catch (err) {
+                showToast("Ошибка при обновлении задачи", "error");
+                console.error("Error updating task:", err);
+            }
+        } else {
+            if (!window.confirm("Создать задачу?")) return;
+            try {
+                await createTask(userId, userId, task);
+                fetchTasks();
+                showToast("Задача успешно создана!", "success");
+            } catch (err) {
+                showToast("Ошибка при создании задачи", "error");
+                console.error("Error creating task:", err);
+            }
         }
     };
+
 
     const handleStatusChange = async (taskId, newStatus) => {
         try {
             await updateStatus(taskId, newStatus);
             fetchTasks();
+            showToast("Статус обновлён", "success");
         } catch (err) {
+            showToast("Ошибка изменения статуса", "error");
             console.error("Error updating status:", err);
         }
     };
 
     const handleDelete = async taskId => {
+        if (!window.confirm("Удалить эту задачу?")) return;
+
         try {
             await deleteTask(taskId);
             fetchTasks();
+            showToast("Задача удалена", "success");
         } catch (err) {
+            showToast("Ошибка удаления", "error");
             console.error("Error deleting task:", err);
         }
+    };
+
+    const handleEdit = (task) => {
+        setEditingTask(task);
+        window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
     const exportToExcel = () => {
@@ -128,7 +159,7 @@ function Dashboard() {
                 <header className="dashboard-header">
                     <h1>Панель управления задачами</h1>
                     <button className="logout-btn" onClick={logout}>
-                        Выйти
+                        Выйти из системы
                     </button>
                     {isAdmin() && (
                         <button className="admin-btn" onClick={() => navigate("/admin")}>
@@ -138,7 +169,9 @@ function Dashboard() {
                 </header>
 
                 <section className="task-section">
-                    <TaskForm onCreate={handleCreate}/>
+                    <TaskForm onCreate={handleCreateOrUpdate}
+                              editingTask={editingTask}
+                    />
 
                     <div className="filters-container">
 
@@ -210,6 +243,7 @@ function Dashboard() {
                             tasks={filteredTasks}
                             onStatusChange={handleStatusChange}
                             onDelete={handleDelete}
+                            onEdit={handleEdit}
                         />
                     )}
                 </section>

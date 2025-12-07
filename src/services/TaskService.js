@@ -4,6 +4,7 @@ export const retrieveAllTasks = (userId) =>
     apiClient.get(`/api/tasks/user/${userId}`);
 
 export const createTask = async (creatorUserId, assigneeEmployeeId, task) => {
+    console.log(task)
     try {
         const response = await apiClient.post(
             `/api/tasks/user/${creatorUserId}/assign/${assigneeEmployeeId}`,

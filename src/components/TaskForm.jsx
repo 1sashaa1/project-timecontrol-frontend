@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import "../css/TaskForm.css"; // не забудьте подключить стили
+import React, {useEffect, useState} from "react";
+import "../css/TaskForm.css";
 
-function TaskForm({ onCreate }) {
+function TaskForm({ onCreate, editingTask}) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [startTime, setStartTime] = useState("");
@@ -12,15 +12,56 @@ function TaskForm({ onCreate }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!title.trim()) return;
+
+        const trimmedTitle = title.trim();
+        const trimmedDescription = description.trim();
+
+        if (!trimmedTitle) {
+            alert("Введите название задачи");
+            return;
+        }
+
+        if (trimmedTitle.length > 100) {
+            alert("Название слишком длинное (максимум 100 символов)");
+            return;
+        }
+
+        if (trimmedDescription.length > 500) {
+            alert("Описание слишком длинное (максимум 500 символов)");
+            return;
+        }
+
+        const validPriorities = ["low", "normal", "high"];
+        if (priority && !validPriorities.includes(priority)) {
+            alert("Выберите корректный приоритет");
+            return;
+        }
+
+        if (!startTime || !endTime) {
+            alert("Укажите даты начала и окончания");
+            return;
+        }
+
+        const start = new Date(startTime);
+        const end = new Date(endTime);
+
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            alert("Неверный формат даты");
+            return;
+        }
+
+        if (start >= end) {
+            alert("Дата окончания должна быть позже даты начала");
+            return;
+        }
 
         onCreate({
-            title: title.trim(),
-            description: description.trim(),
-            startTime,
-            endTime,
-            priority,
-            status
+            title: trimmedTitle,
+            description: trimmedDescription,
+            startDate: start.toISOString(),
+            endDate: end.toISOString(),
+            priority: priority || "low",
+            status: status || "planned"
         });
 
         setTitle("");
@@ -31,6 +72,53 @@ function TaskForm({ onCreate }) {
         setStatus("");
     };
 
+    const arrayToDate = (arr) => {
+        if (!Array.isArray(arr)) return null;
+
+        if (arr.length === 5) {
+            return new Date(arr[0], arr[1] - 1, arr[2], arr[3], arr[4]);
+        }
+
+        // LocalDate: [yyyy, MM, dd]
+        if (arr.length === 3) {
+            return new Date(arr[0], arr[1] - 1, arr[2], 0, 0);
+        }
+
+        return null;
+    };
+
+    const toInputDateTime = (date) => {
+        if (!date) return "";
+
+        const pad = n => String(n).padStart(2, "0");
+
+        const year = date.getFullYear();
+        const month = pad(date.getMonth() + 1);
+        const day = pad(date.getDate());
+        const hours = pad(date.getHours());
+        const minutes = pad(date.getMinutes());
+
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    };
+
+
+    useEffect(() => {
+        if (!editingTask) return;
+
+        const start = arrayToDate(editingTask.startDate);
+        const end = arrayToDate(editingTask.endDate);
+
+        console.log(start, end);
+
+        setTitle(editingTask.title);
+        setDescription(editingTask.description);
+
+        setStartTime(start ? toInputDateTime(start) : "");
+        setEndTime(end ? toInputDateTime(end) : "");
+
+        setPriority(editingTask.priority || "");
+        setStatus(editingTask.status || "planned");
+    }, [editingTask]);
 
     return (
         <form className="task-form" onSubmit={handleSubmit}>
@@ -56,24 +144,12 @@ function TaskForm({ onCreate }) {
                 <select
                     value={priority}
                     onChange={(e) => setPriority(e.target.value)}
-                    className="input"
+                    className="status-input"
                 >
                     <option value="">Выбрать приоритет</option>
                     <option value="low">Низкий</option>
                     <option value="normal">Обычный</option>
                     <option value="high">Высокий</option>
-                </select>
-
-                {/* Выбор статуса */}
-                <select
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                    className="input"
-                >
-                    <option value="">Выбрать статус</option>
-                    <option value="planned">Запланировано</option>
-                    <option value="in_progress">В процессе</option>
-                    <option value="done">Сделано</option>
                 </select>
             </div>
 
@@ -101,7 +177,10 @@ function TaskForm({ onCreate }) {
                 </div>
             </div>
 
-            <button type="submit" className="btn-submit">Добавить задачу</button>
+            <button type="submit" className="btn-submit">
+                {editingTask ? "Сохранить изменения" : "Добавить задачу"}
+            </button>
+
         </form>
     );
 }

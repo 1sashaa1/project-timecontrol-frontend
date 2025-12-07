@@ -7,6 +7,8 @@ import ProtectedRoute from "../routes/ProtectedRoute";
 import CompleteProfilePage from "../pages/CompleteProfilePage";
 import AdminRoute from "./AdminRoute";
 import AdminPanel from "../pages/AdminPanel";
+import Tracker from "../pages/Tracker";
+import StatisticsPage from "../pages/StatisticsPage";
 
 export default function AppRoutes() {
     return (
@@ -41,6 +43,29 @@ export default function AppRoutes() {
                             <AdminPanel />
                         </AdminRoute>
                     }
+                />
+
+                <Route
+                    path="/tracker"
+                    element={
+                        <ProtectedRoute>
+                            <Tracker />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route path="/statistics" element={
+                    <ProtectedRoute>
+                        <StatisticsPage />
+                    </ProtectedRoute>
+                }
+                />
+
+                <Route path="/settings" element={
+                    <ProtectedRoute>
+                        <SettingsPage />
+                    </ProtectedRoute>
+                }
                 />
 
                 <Route path="*" element={<Navigate to="/dashboard" />} />
