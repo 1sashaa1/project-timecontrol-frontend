@@ -9,6 +9,7 @@ import AdminRoute from "./AdminRoute";
 import AdminPanel from "../pages/AdminPanel";
 import Tracker from "../pages/Tracker";
 import StatisticsPage from "../pages/StatisticsPage";
+import SettingsPage from "../pages/SettingsPage";
 
 export default function AppRoutes() {
     return (
