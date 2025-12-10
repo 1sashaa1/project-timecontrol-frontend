@@ -13,7 +13,7 @@
 }
 
 .logout-btn {
-    background-color: #f44336;
+    background-color: #1585d5;
     color: white;
     margin-right: -48px;
     border: none;
@@ -23,7 +23,7 @@
     transition: background-color 0.2s;
 }
 .logout-btn:hover {
-    background-color: #d32f2f;
+    background-color: #14689c;
 }
 
 .admin-btn {
@@ -70,6 +70,7 @@
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    align-content: center;
 }
 .task-form button:hover {
     background-color: #45a049;
@@ -93,7 +94,25 @@
 }
 .task-item.done {
     background-color: #d4edda;
+    opacity: 0.7;
+    pointer-events: none;
 }
+
+.task-item.done .task-actions button {
+    cursor: not-allowed;         /* показываем, что кнопки недоступны */
+    opacity: 0.5;
+}
+
+.task-item.done .edit-btn {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.task-item.done .delete-btn {
+    pointer-events: auto;
+    opacity: 1;
+}
+
 .task-item.pending {
     background-color: #fff3cd;
 }
@@ -171,22 +190,34 @@
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    color: white;
+    background-color: #0c6ccc;
+    margin-left: 10px;
+
 }
 .status-btn.done {
-    background-color: #4caf50;
+    background-color: #15a61e;
     color: white;
+    margin-left: 10px;
 }
+.status-btn.back {
+    background-color: #eab939;
+    color: white;
+    margin-left: 10px;
+}
+
 .status-btn.pending {
     background-color: #ff9800;
     color: white;
 }
 .delete-btn {
-    background-color: #f44336;
+    background-color: #ea3b2e;
     color: white;
     border: none;
     padding: 5px 10px;
     border-radius: 5px;
     cursor: pointer;
+    margin-left: 10px;
 }
 
 .edit-btn {
@@ -196,6 +227,7 @@
     padding: 5px 10px;
     border-radius: 5px;
     cursor: pointer;
+    margin-left: 10px;
 }
 
 .dashboard-layout {
@@ -250,3 +282,55 @@
     border-radius: 6px;
     font-size: 14px;
 }
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.modal-window {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 280px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+.modal-actions {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.confirm-btn {
+    background-color: #61aa64;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.cancel-btn {
+    background-color: #dc625a;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.status-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+

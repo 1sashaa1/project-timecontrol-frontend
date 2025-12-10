@@ -24,3 +24,24 @@ export const getPositions = async () => {
     return response.data; // массив объектов { id, name }
 };
 
+export const getProfile = async () => {
+    const response = await apiClient.get("/api/profile");
+    return response.data;
+};
+
+export const updateProfile = async (profile) => {
+    try {
+        const response = await apiClient.put("/api/profile", {
+            firstName: profile.firstName,
+            lastName: profile.lastName,
+            email: profile.email,
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error updating profile:", error);
+        throw error;
+    }
+};
+
+
+

@@ -1,19 +1,20 @@
-import React, { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import React, { useContext, useEffect, useState } from "react";
+import "../css/SettingsPage.css";
+import Sidebar from "../components/Sidebar";
+import { ThemeContext } from "../contexts/ThemeContext";
+import { LanguageContext } from "../contexts/LanguageContext";
+import { getProfile, updateProfile } from "../services/EmployeeService";
 
 function SettingsPage() {
     const [profile, setProfile] = useState({
         firstName: "",
         lastName: "",
         email: "",
-        avatarUrl: "",
         language: "ru",
     });
+
+    const { theme, setTheme } = useContext(ThemeContext);
+    const { language, changeLanguage, t } = useContext(LanguageContext);
 
     const [ui, setUi] = useState({
         theme: "system",
@@ -28,171 +29,180 @@ function SettingsPage() {
         timerReminders: false,
     });
 
+    useEffect(() => {
+        async function loadProfile() {
+            try {
+                const data = await getProfile();
+                setProfile({
+                    firstName: data.firstName || "",
+                    lastName: data.lastName || "",
+                    email: data.email || "",
+                });
+            } catch (err) {
+                console.error("Ошибка при загрузке профиля:", err);
+                alert(`Ошибка загрузки профиля: ${err.message}`);
+            }
+        }
+
+        loadProfile();
+    }, []);
+
+    const handleUiChange = (field, value) => {
+        setUi({ ...ui, [field]: value });
+        if (field === "theme") {
+            setTheme(value);
+        }
+    };
+
     const handleProfileChange = (field, value) =>
         setProfile({ ...profile, [field]: value });
-
-    const handleUiChange = (field, value) =>
-        setUi({ ...ui, [field]: value });
 
     const handleNotifChange = (field) =>
         setNotifications({ ...notifications, [field]: !notifications[field] });
 
+    const handleSave = async () => {
+        // Подтверждение перед сохранением
+        const confirmed = window.confirm(t.confirmSaveProfile || "Сохранить изменения профиля?");
+        if (!confirmed) return;
+
+        try {
+            const updated = await updateProfile(profile);
+
+            if (updated && updated.status && updated.status >= 200 && updated.status < 300) {
+                alert(t.profileSaved || "Профиль успешно сохранён!");
+            }
+        } catch (err) {
+            console.error("Ошибка при сохранении профиля:", err);
+            alert(`Ошибка при сохранении профиля: ${err.message}`);
+        }
+    };
+
     return (
-        <div className="p-8 space-y-10 max-w-2xl mx-auto">
-            <h1 className="text-3xl font-bold">Настройки профиля</h1>
+        <div className="dashboard-layout">
+            <Sidebar />
+            <div className="dashboard-container">
+                <div className="settings-page">
+                    <h1>{t.settings}</h1>
 
-            {/* ПРОФИЛЬ */}
-            <Card className="p-6 space-y-4">
-                <h2 className="text-xl font-semibold">Профиль</h2>
+                    {/* ПРОФИЛЬ */}
+                    <div className="card">
+                        <h2>{t.profile}</h2>
+                        <div className="form-grid">
+                            <div className="form-group">
+                                <label>{t.firstName}</label>
+                                <input
+                                    value={profile.firstName}
+                                    onChange={(e) => handleProfileChange("firstName", e.target.value)}
+                                />
+                            </div>
 
-                <div className="grid gap-4">
-                    <div>
-                        <Label>Имя</Label>
-                        <Input
-                            value={profile.firstName}
-                            onChange={(e) =>
-                                handleProfileChange("firstName", e.target.value)
-                            }
-                        />
+                            <div className="form-group">
+                                <label>{t.lastName}</label>
+                                <input
+                                    value={profile.lastName}
+                                    onChange={(e) => handleProfileChange("lastName", e.target.value)}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>{t.email}</label>
+                                <input
+                                    type="email"
+                                    value={profile.email}
+                                    onChange={(e) => handleProfileChange("email", e.target.value)}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>{t.language}</label>
+                                <select
+                                    value={language}
+                                    onChange={(e) => changeLanguage(e.target.value)}
+                                >
+                                    <option value="ru">{t.langRu}</option>
+                                    <option value="en">{t.langEn}</option>
+                                    <option value="pl">{t.langPl}</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
-                    <div>
-                        <Label>Фамилия</Label>
-                        <Input
-                            value={profile.lastName}
-                            onChange={(e) =>
-                                handleProfileChange("lastName", e.target.value)
-                            }
-                        />
+                    {/* UI НАСТРОЙКИ */}
+                    <div className="card">
+                        <h2>{t.interface}</h2>
+                        <div className="form-grid">
+                            <div>
+                                <label>{t.theme}</label>
+                                <select
+                                    value={ui.theme}
+                                    onChange={(e) => handleUiChange("theme", e.target.value)}
+                                >
+                                    <option value="light">{t.themeLight}</option>
+                                    <option value="dark">{t.themeDark}</option>
+                                    <option value="system">{t.themeSystem}</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label>{t.dateFormat}</label>
+                                <select
+                                    value={ui.dateFormat}
+                                    onChange={(e) => handleUiChange("dateFormat", e.target.value)}
+                                >
+                                    <option value="DD.MM.YYYY">DD.MM.YYYY</option>
+                                    <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                                    <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label>{t.timeFormat}</label>
+                                <select
+                                    value={ui.timeFormat}
+                                    onChange={(e) => handleUiChange("timeFormat", e.target.value)}
+                                >
+                                    <option value="24h">{t.time24}</option>
+                                    <option value="12h">{t.time12}</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label>{t.weekStart}</label>
+                                <select
+                                    value={ui.weekStart}
+                                    onChange={(e) => handleUiChange("weekStart", e.target.value)}
+                                >
+                                    <option value="monday">{t.monday}</option>
+                                    <option value="sunday">{t.sunday}</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
-                    <div>
-                        <Label>Email</Label>
-                        <Input
-                            type="email"
-                            value={profile.email}
-                            onChange={(e) =>
-                                handleProfileChange("email", e.target.value)
-                            }
-                        />
+                    {/* УВЕДОМЛЕНИЯ */}
+                    <div className="card">
+                        <h2>{t.notifications}</h2>
+                        {[
+                            { label: t.notifTasks, field: "emailTasks" },
+                            { label: t.notifDeadlines, field: "deadlines" },
+                            { label: t.notifTimer, field: "timerReminders" }
+                        ].map((item, i) => (
+                            <div key={i} className="flex-between">
+                                <span>{item.label}</span>
+                                <input
+                                    type="checkbox"
+                                    checked={notifications[item.field]}
+                                    onChange={() => handleNotifChange(item.field)}
+                                />
+                            </div>
+                        ))}
                     </div>
 
-                    <div>
-                        <Label>Язык</Label>
-                        <Select
-                            value={profile.language}
-                            onValueChange={(v) => handleProfileChange("language", v)}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Выбери язык" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="ru">Русский</SelectItem>
-                                <SelectItem value="en">English</SelectItem>
-                                <SelectItem value="pl">Polski</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
+                    <button className="save-btn" onClick={handleSave}>
+                        {t.save}
+                    </button>
                 </div>
-            </Card>
-
-            {/* UI НАСТРОЙКИ */}
-            <Card className="p-6 space-y-4">
-                <h2 className="text-xl font-semibold">Интерфейс</h2>
-
-                <div className="grid gap-4">
-                    <div>
-                        <Label>Тема</Label>
-                        <Select
-                            value={ui.theme}
-                            onValueChange={(v) => handleUiChange("theme", v)}
-                        >
-                            <SelectTrigger>
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="light">Светлая</SelectItem>
-                                <SelectItem value="dark">Тёмная</SelectItem>
-                                <SelectItem value="system">Системная</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div>
-                        <Label>Формат даты</Label>
-                        <Select
-                            value={ui.dateFormat}
-                            onValueChange={(v) => handleUiChange("dateFormat", v)}
-                        >
-                            <SelectTrigger><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="DD.MM.YYYY">DD.MM.YYYY</SelectItem>
-                                <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
-                                <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div>
-                        <Label>Формат времени</Label>
-                        <Select
-                            value={ui.timeFormat}
-                            onValueChange={(v) => handleUiChange("timeFormat", v)}
-                        >
-                            <SelectTrigger><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="24h">24 часа</SelectItem>
-                                <SelectItem value="12h">12 часов</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div>
-                        <Label>Первый день недели</Label>
-                        <Select
-                            value={ui.weekStart}
-                            onValueChange={(v) => handleUiChange("weekStart", v)}
-                        >
-                            <SelectTrigger><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="monday">Понедельник</SelectItem>
-                                <SelectItem value="sunday">Воскресенье</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
-            </Card>
-
-            {/* УВЕДОМЛЕНИЯ */}
-            <Card className="p-6 space-y-4">
-                <h2 className="text-xl font-semibold">Уведомления</h2>
-
-                <div className="flex items-center justify-between">
-                    <Label>Email уведомления по задачам</Label>
-                    <Switch
-                        checked={notifications.emailTasks}
-                        onCheckedChange={() => handleNotifChange("emailTasks")}
-                    />
-                </div>
-
-                <div className="flex items-center justify-between">
-                    <Label>Напоминания о дедлайнах</Label>
-                    <Switch
-                        checked={notifications.deadlines}
-                        onCheckedChange={() => handleNotifChange("deadlines")}
-                    />
-                </div>
-
-                <div className="flex items-center justify-between">
-                    <Label>Напомнить начать/остановить таймер</Label>
-                    <Switch
-                        checked={notifications.timerReminders}
-                        onCheckedChange={() => handleNotifChange("timerReminders")}
-                    />
-                </div>
-            </Card>
-
-            <Button className="w-full">Сохранить изменения</Button>
+            </div>
         </div>
     );
 }

@@ -85,7 +85,6 @@
 
 .task-item.done {
   background-color: #d4edda;
-  text-decoration: line-through;
 }
 
 .task-form input {

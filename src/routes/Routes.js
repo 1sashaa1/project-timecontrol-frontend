@@ -10,6 +10,7 @@ import AdminPanel from "../pages/AdminPanel";
 import Tracker from "../pages/Tracker";
 import StatisticsPage from "../pages/StatisticsPage";
 import SettingsPage from "../pages/SettingsPage";
+import Messenger from "../pages/Messenger";
 
 export default function AppRoutes() {
     return (
@@ -65,6 +66,13 @@ export default function AppRoutes() {
                 <Route path="/settings" element={
                     <ProtectedRoute>
                         <SettingsPage />
+                    </ProtectedRoute>
+                }
+                />
+
+                <Route path="/messenger" element={
+                    <ProtectedRoute>
+                        <Messenger />
                     </ProtectedRoute>
                 }
                 />

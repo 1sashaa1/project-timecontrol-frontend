@@ -1,0 +1,170 @@
+.chat-layout {
+    display: flex;
+    height: 100vh;
+    background-color: #f5f5f5;
+    font-family: Arial, sans-serif;
+}
+
+.chat-container {
+    display: flex;
+    flex: 1;
+}
+
+.chat-settings-page {
+    width: 280px;
+    background-color: #ffffff;
+    border-right: 1px solid #ddd;
+    padding: 15px;
+    overflow-y: auto;
+}
+
+.searchInput {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+}
+
+.item, .dialogItem {
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.item:hover, .dialogItem:hover {
+    background-color: #f0f0f0;
+}
+
+/* Правая панель (чат) */
+.chatArea {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #c7c8c9;
+}
+
+.messagesBox {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Сообщения */
+.messageWrapper {
+    display: flex;
+    margin-bottom: 8px;
+}
+
+.messageLeft {
+    justify-content: flex-start;
+}
+
+.messageRight {
+    justify-content: flex-end;
+}
+
+.messageBubble {
+    max-width: 60%;
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.leftBubble {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-bottom-left-radius: 4px;
+}
+
+.rightBubble {
+    background-color: #dcf8c6;
+    border-bottom-right-radius: 4px;
+}
+
+/* Поле ввода */
+.inputRow {
+    display: flex;
+    padding: 10px;
+    background-color: #fff;
+    border-top: 1px solid #ddd;
+}
+
+.messageInput {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    outline: none;
+}
+
+.sendBtn {
+    margin-left: 10px;
+    padding: 0 20px;
+    border: none;
+    border-radius: 20px;
+    background-color: #4a66f7;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.sendBtn:hover {
+    background-color: #0077b6;
+}
+.message-wrapper {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+    max-width: 70%;
+}
+
+.message-right {
+    align-self: flex-end;
+    text-align: right;
+}
+
+.message-left {
+    align-self: flex-start;
+    text-align: left;
+}
+
+.message-meta {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.message-author {
+    font-weight: bold;
+    margin-right: 6px;
+}
+
+.message-time {
+    font-size: 11px;
+    color: #999;
+}
+
+.message-bubble {
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.left-bubble {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-bottom-left-radius: 4px;
+}
+
+.right-bubble {
+    background-color: #dcf8c6;
+    border-bottom-right-radius: 4px;
+}

@@ -4,15 +4,35 @@ function TaskItem({ task, onStatusChange, onDelete, onEdit}) {
     const [timeLeft, setTimeLeft] = useState("");
     const [progress, setProgress] = useState(0);
     const [progressColor, setProgressColor] = useState("#4caf50");
+    const [confirmFinish, setConfirmFinish] = useState(false);
 
     const handleClick = (newStatus) => {
+        if (newStatus === "done") {
+            setConfirmFinish(true);
+            return;
+        }
+
         onStatusChange(task.id, newStatus);
     };
+    const statusLabels = {
+        planned: "запланирована",
+        in_progress: "в процессе",
+        done: "завершена"
+    };
+
+    const priorityLabels = {
+        low: "низкий",
+        high: "высокий",
+        normal: "обычный"
+    };
+
 
     const renderButton = () => {
+        const now = new Date();
+        const canStart = !start || now >= start;
         switch (task.status) {
             case "planned":
-                return <button onClick={() => handleClick("in_progress")} className="status-btn start">Начать</button>;
+                return <button onClick={() => handleClick("in_progress")} className="status-btn start"  disabled={!canStart} >Начать</button>;
             case "in_progress":
                 return (
                     <>
@@ -110,45 +130,93 @@ function TaskItem({ task, onStatusChange, onDelete, onEdit}) {
 
     const start = parseDateArray(task.startDate);
     const end = parseDateArray(task.endDate);
+    const confirmModal = confirmFinish && (
+        <div className="modal-overlay">
+            <div className="modal-window">
+                <p>Вы действительно хотите завершить задачу?</p>
+                <div className="modal-actions">
+                    <button
+                        className="confirm-btn"
+                        onClick={() => {
+                            setConfirmFinish(false);
+                            onStatusChange(task.id, "done");
+                        }}
+                    >
+                        Да
+                    </button>
+
+                    <button
+                        className="cancel-btn"
+                        onClick={() => setConfirmFinish(false)}
+                    >
+                        Отмена
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
 
     return (
-        <li className={`task-item ${task.status || "planned"} ${isOverdue ? "overdue" : ""}`}>
-            <div className="task-main">
-                <h3>{task.title}</h3>
-                <p>{task.description}</p>
+        <>
+            {confirmModal}
+            <li className={`task-item ${task.status || "planned"} ${isOverdue ? "overdue" : ""}`}>
+                <div className="task-main">
+                    <h3>{task.title}</h3>
+                    <p>{task.description}</p>
 
-                {(start || end) && (
-                    <p className="task-dates">
-                        {start && <span>Начало: <strong>{formatDate(start)}</strong></span>}
-                        {" "}
-                        {end && <>
-                            <br/>
-                            <span> Дедлайн: <strong>{formatDate(end)}</strong></span>
-                            {timeLeft && <span className={`time-left ${isOverdue ? "overdue-label" : ""}`}> ({timeLeft})</span>}
-                        </>}
+                    {(start || end) && (
+                        <p className="task-dates">
+                            {start && <span>Начало: <strong>{formatDate(start)}</strong></span>}
+                            {" "}
+                            {end && <>
+                                <br/>
+                                <span> Дедлайн: <strong>{formatDate(end)}</strong></span>
+                                {timeLeft && <span
+                                    className={`time-left ${isOverdue ? "overdue-label" : ""}`}> ({timeLeft})</span>}
+                            </>}
+                        </p>
+                    )}
+
+                    <div className="progress-bar-container">
+                        <div className={`progress-bar ${isOverdue ? "overdue" : ""}`}
+                             style={{width: `${progress}%`, backgroundColor: progressColor}}/>
+                    </div>
+
+                    <p className="task-meta">
+                        Статус: <strong>{statusLabels[task.status] ?? "Запланирована"}</strong>,{" "}
+                        приоритет: <strong>{priorityLabels[task.priority] ?? "Обычный"}</strong>
                     </p>
-                )}
 
-                <div className="progress-bar-container">
-                    <div className={`progress-bar ${isOverdue ? "overdue" : ""}`} style={{ width: `${progress}%`, backgroundColor: progressColor }} />
+                    {task.status === "done" && task.finishedAt && (
+                        <p className="task-finished">
+                            Завершено:{" "}
+                            <strong>
+                                {parseDateArray(task.finishedAt).toLocaleString("ru-RU", {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                    year: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                })}
+                            </strong>
+                        </p>
+                    )}
+
                 </div>
 
-                <p className="task-meta">
-                    Статус: <strong>{task.status ?? "planned"}</strong> {", "}
-                    приоритет: <strong>{task.priority ?? "normal"}</strong>
-                </p>
-            </div>
+                <div className="task-actions">
+                    {task.status !== "done" && renderButton()}
+                    {task.status !== "done" && (
+                        <>
+                        <button className="delete-btn" onClick={() => onDelete(task.id)}>Удалить</button>
+                            <button className="edit-btn" onClick={() => onEdit(task)}>Редактировать</button>
+                        </>
+                    )}
+                </div>
 
-            <div className="task-actions">
-                {renderButton()}
-                <button className="delete-btn" onClick={() => onDelete(task.id)}>Удалить</button>
-                <button className="edit-btn" onClick={() => onEdit(task)}>
-                    Редактировать
-                </button>
+            </li>
+            </>
+            );
+            }
 
-            </div>
-        </li>
-    );
-}
-
-export default TaskItem;
+            export default TaskItem;

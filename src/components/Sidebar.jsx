@@ -35,7 +35,7 @@ function Sidebar() {
                     </li>
 
                     <li>
-                        <NavLink to="/chat" className="sidebar-link">
+                        <NavLink to="/messenger" className="sidebar-link">
                             <FiMessageCircle className="icon" /> Чат
                         </NavLink>
                     </li>

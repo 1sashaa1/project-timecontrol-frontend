@@ -15,7 +15,10 @@ import Sidebar from "../components/Sidebar";
 import {isAdmin} from "../services/AuthService";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../components/ToastContext";
-
+import RobotoMedium from "../font/Roboto-Medium.js";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 
 function Dashboard() {
     const { logout } = useContext(AuthContext);
@@ -112,6 +115,12 @@ function Dashboard() {
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
+    const parseDateArray = (arr) => {
+        if (!Array.isArray(arr) || arr.length < 3) return "";
+        const [year, month, day, hour = 0, minute = 0] = arr;
+        return new Date(year, month - 1, day, hour, minute).toLocaleDateString();
+    };
+
     const exportToExcel = () => {
         const worksheetData = tasks.map(task => ({
             ID: task.id,
@@ -119,21 +128,49 @@ function Dashboard() {
             Description: task.description,
             Status: task.status ?? "planned",
             Priority: task.priority ?? "normal",
-            StartDate: task.startDate ?? "",
-            EndDate: task.endDate ?? ""
+            StartDate: parseDateArray(task.startDate),
+            EndDate: parseDateArray(task.endDate)
         }));
+
+        console.log(worksheetData);
 
         const worksheet = XLSX.utils.json_to_sheet(worksheetData);
 
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Tasks");
-
         XLSX.writeFile(workbook, "tasks_report.xlsx");
-
-
     };
 
-        const filteredTasks = tasks.filter(task => {
+    const exportToPDF = () => {
+        const doc = new jsPDF();
+
+        doc.addFileToVFS("Roboto-Medium.ttf", RobotoMedium);
+        doc.addFont("Roboto-Medium.ttf", "Roboto", "normal");
+        doc.setFont("Roboto");
+
+        const tableColumn = ["ID", "Title", "Description", "Status", "Priority", "Start Date", "End Date"];
+        const tableRows = tasks.map(task => [
+            task.id,
+            task.title,
+            task.description,
+            task.status ?? "planned",
+            task.priority ?? "normal",
+            parseDateArray(task.startDate),
+            parseDateArray(task.endDate)
+        ]);
+
+        autoTable(doc, {
+            head: [tableColumn],
+            body: tableRows,
+            startY: 20,
+            styles: { font: "Roboto", fontSize: 10 },
+            headStyles: { fillColor: [22, 160, 133] },
+        });
+
+        doc.save("tasks_report.pdf");
+    };
+
+    const filteredTasks = tasks.filter(task => {
             const matchesSearch =
                 task.title.toLowerCase().includes(search.toLowerCase());
 
@@ -163,7 +200,7 @@ function Dashboard() {
                     </button>
                     {isAdmin() && (
                         <button className="admin-btn" onClick={() => navigate("/admin")}>
-                            Admin Panel
+                            Панель администратора
                         </button>
                     )}
                 </header>
@@ -248,6 +285,9 @@ function Dashboard() {
                     )}
                 </section>
                 <button className="status-btn done" onClick={exportToExcel}>Скачать отчёт (Excel)</button>
+                <button onClick={exportToPDF} className="status-btn done">
+                    Экспорт в PDF
+                </button>
             </div>
         </div>
     );

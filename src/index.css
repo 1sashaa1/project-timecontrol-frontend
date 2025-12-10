@@ -11,3 +11,42 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Светлая тема */
+:root[data-theme='light'] {
+  --bg: #f7f7f7;
+  --card-bg: white;
+  --text: #222;
+  --border: #ddd;
+}
+
+/* Тёмная тема */
+:root[data-theme='dark'] {
+  --bg: #1b1b1f;
+  --card-bg: #242428;
+  --text: #eee;
+  --border: #3a3a3f;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  padding: 16px;
+  border-radius: 10px;
+}
+
+input, select {
+  background: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.settings-page h1,
+.settings-page h2 {
+  color: var(--text);
+}

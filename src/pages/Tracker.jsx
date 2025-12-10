@@ -9,6 +9,7 @@ export default function Tracker() {
     const userId = getUserId();
     const [tasks, setTasks] = useState([]);
     const [selectedTaskId, setSelectedTaskId] = useState(null);
+    const [taskTotals, setTaskTotals] = useState({}); // {taskId: minutes}
 
     useEffect(() => {
         if (!userId) return;
@@ -25,7 +26,6 @@ export default function Tracker() {
     return (
         <div className="dashboard-layout">
             <Sidebar />
-
             <div className="dashboard-container tracker">
                 <div className="tracker-card">
                     <div className="tracker-header">
@@ -34,7 +34,7 @@ export default function Tracker() {
 
                     <div className="tracker-select-wrap">
                         <select
-                            value={selectedTaskId || ""}
+                            value={selectedTaskId ?? ""}
                             onChange={(e) => setSelectedTaskId(Number(e.target.value))}
                             className="tracker-select"
                         >
@@ -46,10 +46,9 @@ export default function Tracker() {
                     </div>
 
                     {selectedTaskId && (
-                        <div className="task-details">
-                            {Array.isArray(tasks) && tasks
-                                .filter(t => t.id === selectedTaskId)
-                                .map(task => (
+                        <>
+                            <div className="task-details">
+                                {tasks.filter(t => t.id === selectedTaskId).map(task => (
                                     <div key={task.id} className="task-details-content">
                                         <div className="task-row">
                                             <span className="task-label">Название:</span>
@@ -57,15 +56,11 @@ export default function Tracker() {
                                         </div>
                                         <div className="task-row">
                                             <span className="task-label">Описание:</span>
-                                            <span className="task-value">
-                  {task.description || "Описание отсутствует"}
-                </span>
+                                            <span className="task-value">{task.description || "Описание отсутствует"}</span>
                                         </div>
                                         <div className="task-row">
                                             <span className="task-label">Приоритет:</span>
-                                            <span className="task-pill">
-                  {task.priority || "не указан"}
-                </span>
+                                            <span className="task-pill">{task.priority || "не указан"}</span>
                                         </div>
                                         <div className="task-row">
                                             <span className="task-label">Дедлайн:</span>
@@ -73,17 +68,19 @@ export default function Tracker() {
                                         </div>
                                     </div>
                                 ))}
-                        </div>
-                    )}
+                            </div>
 
-                    {selectedTaskId && (
-                        <div className="tracker-timer">
-                            <TimeTrackerEnhanced employeeId={userId} taskId={selectedTaskId} />
-                        </div>
+                            <div className="tracker-timer">
+                                <TimeTrackerEnhanced
+                                    employeeId={userId}
+                                    taskId={selectedTaskId}
+                                    onTotalsUpdate={(totals) => setTaskTotals(totals)}
+                                />
+                            </div>
+                        </>
                     )}
                 </div>
             </div>
-
         </div>
     );
 }
