@@ -1,123 +1,126 @@
-/* Общий контейнер */
 .admin-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', sans-serif;
 }
 
-/* Заголовок */
 .admin-title {
     text-align: center;
     margin-bottom: 20px;
-    color: #333;
 }
 
-/* Форма создания/редактирования */
-.admin-form {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 30px;
-    padding: 15px;
+.admin-form input, .admin-form select {
+    padding: 8px 10px;
+    margin: 5px;
+    border-radius: 5px;
     border: 1px solid #ccc;
-    border-radius: 10px;
-    background-color: #f9f9f9;
-}
-
-.admin-form input,
-.admin-form select {
-    flex: 1 1 200px;
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
     font-size: 14px;
 }
 
-.admin-form button {
-    padding: 10px 20px;
+.btn-submit {
     background-color: #4caf50;
-    border: none;
     color: white;
-    border-radius: 6px;
+    border: none;
+    padding: 8px 15px;
+    margin: 5px;
+    border-radius: 5px;
     cursor: pointer;
-    transition: 0.2s;
 }
+.btn-submit:hover { background-color: #45a049; }
 
-.admin-form button:hover {
-    background-color: #45a049;
-}
-
-/* Кнопка отмены */
-.admin-form button[type="button"] {
+.btn-cancel {
     background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: pointer;
 }
+.btn-cancel:hover { background-color: #d32f2f; }
 
-.admin-form button[type="button"]:hover {
-    background-color: #d73833;
+.btn-export {
+    margin: 10px 0;
+    background-color: #2196f3;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
 }
-
-/* Таблица */
-.admin-table-wrapper {
-    overflow-x: auto;
-}
+.btn-export:hover { background-color: #1976d2; }
 
 .admin-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
+    margin-top: 15px;
 }
-
-.admin-table th,
-.admin-table td {
-    border: 1px solid #ddd;
-    padding: 10px;
+.admin-table th, .admin-table td {
+    border: 1px solid #ccc;
+    padding: 8px;
     text-align: left;
 }
-
 .admin-table th {
-    background-color: #f2f2f2;
-    font-weight: bold;
+    background-color: #f0f0f0;
+    cursor: grab;
 }
 
-/* Строки таблицы */
-.admin-table tr:nth-child(even) {
-    background-color: #fafafa;
-}
-
-.admin-table tr:hover {
-    background-color: #f1f1f1;
-}
-
-/* Кнопки действий */
-.admin-table button {
-    margin-right: 5px;
-    padding: 5px 10px;
-    font-size: 12px;
-    border-radius: 4px;
+.btn-edit {
+    background-color: #ffc107;
+    color: white;
     border: none;
+    padding: 5px 10px;
+    margin-right: 5px;
+    border-radius: 4px;
     cursor: pointer;
-    transition: 0.2s;
 }
+.btn-edit:hover { background-color: #e0a800; }
 
-.admin-table button:hover {
-    opacity: 0.8;
-}
-
-.admin-table button.delete {
+.btn-delete {
     background-color: #f44336;
     color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.btn-delete:hover { background-color: #d32f2f; }
+
+.pagination {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
 }
 
-.admin-table button.edit {
-    background-color: #2196f3;
-    color: white;
+.admin-log {
+    margin-top: 20px;
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 6px;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+}
+.sortable {
+    cursor: pointer;
 }
 
-/* Загрузка */
-.admin-loading {
-    text-align: center;
-    font-size: 16px;
-    color: #555;
-    margin-top: 50px;
+.admin-filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.filter-input {
+    flex: 1;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #aaa;
+}
+
+.filter-select {
+    padding: 8px;
+    border-radius: 6px;
 }

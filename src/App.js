@@ -1,7 +1,7 @@
 import React from "react";
 import { AuthProvider } from "./contexts/AuthContext";
 import AppRoutes from "./routes/Routes";
-import { ToastProvider } from "./components/ToastContext";
+import { ToastProvider } from "./contexts/ToastContext";
 
 function App() {
   return (
