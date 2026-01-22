@@ -246,7 +246,7 @@ function AdminPanel() {
                             </tr>
                             </thead>
                             <tbody>
-                            {users.map((user) => (
+                            {paginatedUsers.map((user) => (
                                 <tr key={user.id} className={user.status === "inactive" ? "inactive-row" : ""}>
                                     {columns.map((col) => {
                                         switch (col) {
