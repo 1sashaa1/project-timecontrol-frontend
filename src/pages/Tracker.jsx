@@ -9,7 +9,6 @@ export default function Tracker() {
     const userId = getUserId();
     const [tasks, setTasks] = useState([]);
     const [selectedTaskId, setSelectedTaskId] = useState(null);
-    const [taskTotals, setTaskTotals] = useState({}); // {taskId: minutes}
 
     useEffect(() => {
         if (!userId) return;
@@ -74,7 +73,6 @@ export default function Tracker() {
                                 <TimeTrackerEnhanced
                                     employeeId={userId}
                                     taskId={selectedTaskId}
-                                    onTotalsUpdate={(totals) => setTaskTotals(totals)}
                                 />
                             </div>
                         </>

@@ -50,12 +50,9 @@ export default function LoginForm() {
                 <button className="auth-button" type="submit">Login</button>
             </form>
 
-            <p style={{marginTop: "15px", fontSize: "14px"}}>
+            <p className="auth-switch">
                 Don't have an account?{" "}
-                <span
-                    style={{color: "#4CAF50", cursor: "pointer", fontWeight: "bold"}}
-                    onClick={() => navigate("/register")}
-                >
+                <span className="auth-switch-link" onClick={() => navigate("/register")}>
           Register here
         </span>
             </p>

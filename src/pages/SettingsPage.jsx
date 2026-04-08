@@ -13,7 +13,7 @@ function SettingsPage() {
         language: "ru",
     });
 
-    const { theme, setTheme } = useContext(ThemeContext);
+    const { setTheme } = useContext(ThemeContext);
     const { language, changeLanguage, t } = useContext(LanguageContext);
 
     const [ui, setUi] = useState({

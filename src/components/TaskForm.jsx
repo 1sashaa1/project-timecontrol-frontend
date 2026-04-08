@@ -1,20 +1,27 @@
 import React, {useEffect, useState} from "react";
 import "../css/TaskForm.css";
 
-function TaskForm({ onCreate, editingTask}) {
+function TaskForm({ onCreate, editingTask, projects,
+                      employees }) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [startTime, setStartTime] = useState("");
     const [endTime, setEndTime] = useState("");
     const [priority, setPriority] = useState("");
     const [status, setStatus] = useState("");
-
+    const [projectId, setProjectId] = useState("");
+    const [assigneeId, setAssigneeId] = useState("");
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
         const trimmedTitle = title.trim();
         const trimmedDescription = description.trim();
+
+        if (!projectId && !editingTask) {
+            alert("Выберите проект");
+            return;
+        }
 
         if (!trimmedTitle) {
             alert("Введите название задачи");
@@ -61,7 +68,9 @@ function TaskForm({ onCreate, editingTask}) {
             startDate: start.toISOString(),
             endDate: end.toISOString(),
             priority: priority || "low",
-            status: status || "planned"
+            status: status || "planned",
+            projectId: projectId,
+            assigneeId: assigneeId
         });
 
         setTitle("");
@@ -70,6 +79,8 @@ function TaskForm({ onCreate, editingTask}) {
         setEndTime("");
         setPriority("");
         setStatus("");
+        setProjectId("");
+        setAssigneeId("");
     };
 
     const arrayToDate = (arr) => {
@@ -103,7 +114,11 @@ function TaskForm({ onCreate, editingTask}) {
 
 
     useEffect(() => {
-        if (!editingTask) return;
+        if (!editingTask) {
+            setProjectId("");
+            setAssigneeId("");
+            return;
+        }
 
         const start = arrayToDate(editingTask.startDate);
         const end = arrayToDate(editingTask.endDate);
@@ -118,11 +133,39 @@ function TaskForm({ onCreate, editingTask}) {
 
         setPriority(editingTask.priority || "");
         setStatus(editingTask.status || "planned");
+        setProjectId(editingTask.project?.id?.toString?.() || editingTask.projectId?.toString?.() || "");
+        setAssigneeId(editingTask.assignedTo?.id?.toString?.() || editingTask.assigneeId?.toString?.() || "");
     }, [editingTask]);
 
     return (
         <form className="task-form" onSubmit={handleSubmit}>
             <h3 className="form-title">Создание задачи</h3>
+
+            <select
+                value={projectId}
+                onChange={(e) => setProjectId(e.target.value)}
+                className="status-input"
+            >
+                <option value="">Выберите проект</option>
+                {projects.map(project => (
+                    <option key={project.id} value={project.id}>
+                        {project.projectName}
+                    </option>
+                ))}
+            </select>
+
+            <select
+                value={assigneeId}
+                onChange={(e) => setAssigneeId(e.target.value)}
+                className="status-input"
+            >
+                <option value="">Назначить сотрудника</option>
+                {employees && employees.map(emp => (
+                    <option key={emp.id} value={emp.id}>
+                        {emp.surname} {emp.name}
+                    </option>
+                ))}
+            </select>
 
             <div className="form-block">
                 <input

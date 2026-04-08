@@ -12,6 +12,12 @@ export const resumeTimer = (taskId, employeeId) =>
 export const stopTimer = (taskId, employeeId) =>
     api.post("/api/time/stop", { taskId, employeeId });
 
+export const addManualTime = (taskId, employeeId, minutes) =>
+    api.post("/api/time/manual", { taskId, employeeId, minutes });
+
+export const getTrackerState = (taskId, employeeId) =>
+    api.get(`/api/time/state?taskId=${taskId}&employeeId=${employeeId}`);
+
 export const getTodayReport = (employeeId) =>
     api.get(`/api/time/report/today?employeeId=${employeeId}`);
 

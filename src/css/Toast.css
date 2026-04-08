@@ -19,8 +19,8 @@
     padding: 14px 16px;
     border-radius: 12px;
 
-    color: white;
-    font-size: 15px;
+    color: #fff;
+    font-size: 14px;
 
     box-shadow: 0 6px 18px rgba(0,0,0,0.25);
 
@@ -32,22 +32,22 @@
 
 /* success */
 .toast.success {
-    background: #6aaf72;
+    background: #36b37e;
 }
 
 /* error */
 .toast.error {
-    background: #d88c8c;
+    background: #de350b;
 }
 
 /* info */
 .toast.info {
-    background: #1976d2;
+    background: #0052cc;
 }
 
 /* warning */
 .toast.warning {
-    background: #f4a100;
+    background: #ff8b00;
 }
 
 /* icons */

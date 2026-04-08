@@ -24,11 +24,9 @@ function AdminPanel() {
         "ID", "Фамилия", "Имя", "Отчество", "Email", "Телефон", "Позиция", "Статус", "Действия"
     ]);
     const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
+    const [pageSize] = useState(10);
     const [log, setLog] = useState([]);
     const [statusFilter, setStatusFilter] = useState("ALL");
-    const [sortField, setSortField] = useState(null);
-    const [sortDir, setSortDir] = useState("asc");
     const [search, setSearch] = useState("");
 
     useEffect(() => {
@@ -129,36 +127,7 @@ function AdminPanel() {
         }
     };
 
-    // ------------------ Сортировка ------------------
-    const fieldMap = {
-        "ID": "id",
-        "Фамилия": "surname",
-        "Имя": "name",
-        "Отчество": "patronymic",
-        "Email": "email",
-        "Телефон": "phone",
-        "Позиция": "position",
-        "Статус": "status"
-    };
-
-    const handleSort = (col) => {
-        if (sortField === col) {
-            setSortDir(sortDir === "asc" ? "desc" : "asc");
-        } else {
-            setSortField(col);
-            setSortDir("asc");
-        }
-    };
-
-    const sortedUsers = [...users].sort((a, b) => {
-        if (!sortField) return 0;
-        const key = fieldMap[sortField];
-        const valA = (a[key] || "").toString();
-        const valB = (b[key] || "").toString();
-        return sortDir === "asc" ? valA.localeCompare(valB) : valB.localeCompare(valA);
-    });
-
-    const filteredUsers = sortedUsers.filter(u => {
+    const filteredUsers = users.filter(u => {
         const fullName = `${u.surname} ${u.name} ${u.patronymic}`.toLowerCase();
         const matchesSearch =
             fullName.includes(search.toLowerCase()) ||

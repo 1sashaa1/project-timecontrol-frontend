@@ -64,6 +64,12 @@ function RegisterForm() {
                     Register
                 </button>
             </form>
+            <p className="auth-switch">
+                Already have an account?{" "}
+                <span className="auth-switch-link" onClick={() => navigate("/")}>
+                    Login here
+                </span>
+            </p>
         </div>
     );
 }

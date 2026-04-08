@@ -1,15 +1,15 @@
 /* Container */
 .tracker {
-    padding: 24px;
-    background: #f7f8fa;
-    border-radius: 12px;
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
 }
 
 .tracker-card {
     background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(16, 24, 40, 0.06);
+    border: 1px solid #dfe1e6;
+    border-radius: 14px;
+    box-shadow: 0 6px 16px rgba(9, 30, 66, 0.07);
     padding: 20px;
 }
 
@@ -22,9 +22,9 @@
 }
 
 .tracker-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #1f2937;
+    font-size: 22px;
+    font-weight: 700;
+    color: #172b4d;
     margin: 0;
 }
 
@@ -39,7 +39,7 @@
     font-size: 14px;
     color: #111827;
     background: #fff;
-    border: 1px solid #d1d5db;
+    border: 1px solid #c1c7d0;
     border-radius: 10px;
     padding: 10px 12px;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -47,14 +47,14 @@
 
 .tracker-select:focus {
     outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    border-color: #4c9aff;
+    box-shadow: 0 0 0 3px rgba(76, 154, 255, 0.25);
 }
 
 /* Task details */
 .task-details {
-    border: 1px solid #e5e7eb;
-    background: #fafafa;
+    border: 1px solid #ebecf0;
+    background: #f4f5f7;
     border-radius: 10px;
     padding: 14px;
     margin-bottom: 16px;
@@ -71,7 +71,7 @@
 }
 
 .task-label {
-    color: #6b7280;
+    color: #5e6c84;
     font-size: 13px;
 }
 
@@ -84,9 +84,9 @@
 .task-pill {
     display: inline-block;
     font-size: 12px;
-    color: #1f2937;
-    background: #e5f0ff;
-    border: 1px solid #bfdbfe;
+    color: #0747a6;
+    background: #deebff;
+    border: 1px solid #b3d4ff;
     border-radius: 999px;
     padding: 4px 10px;
 }
@@ -96,6 +96,116 @@
     margin-top: 8px;
 }
 
+.tracker-widget {
+    border: 1px solid #dfe1e6;
+    border-radius: 12px;
+    padding: 14px;
+    background: #fff;
+}
+
+.tracker-widget-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.tracker-widget-title {
+    margin: 0;
+    font-size: 18px;
+    color: #172b4d;
+}
+
+.tracker-widget-stats {
+    display: flex;
+    gap: 12px;
+}
+
+.tracker-widget-stat {
+    background: #f4f5f7;
+    border: 1px solid #ebecf0;
+    border-radius: 10px;
+    padding: 8px 10px;
+    min-width: 130px;
+}
+
+.tracker-widget-stat span {
+    display: block;
+    font-size: 11px;
+    color: #5e6c84;
+}
+
+.tracker-widget-stat strong {
+    display: block;
+    margin-top: 3px;
+    font-size: 14px;
+    color: #172b4d;
+    font-family: Consolas, monospace;
+}
+
+.tracker-live-row {
+    margin-top: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.tracker-live-time {
+    font-size: 34px;
+    color: #172b4d;
+    font-family: Consolas, monospace;
+    font-weight: 700;
+}
+
+.tracker-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    border: none;
+    border-radius: 10px;
+    padding: 8px 12px;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn.green { background: #36b37e; }
+.btn.yellow { background: #ffab00; color: #172b4d; }
+.btn.red { background: #de350b; }
+.btn.blue { background: #0052cc; }
+
+.tracker-session {
+    margin-top: 8px;
+    color: #6b778c;
+    font-size: 12px;
+}
+
+.tracker-manual {
+    margin-top: 12px;
+}
+
+.tracker-manual-label {
+    font-size: 12px;
+    color: #5e6c84;
+}
+
+.tracker-manual-row {
+    margin-top: 6px;
+    display: flex;
+    gap: 8px;
+}
+
+.tracker-manual-input {
+    flex: 1;
+    border: 1px solid #c1c7d0;
+    border-radius: 10px;
+    padding: 9px 10px;
+}
+
 /* Responsive */
 @media (max-width: 640px) {
     .task-details-content {
@@ -103,5 +213,15 @@
     }
     .task-label {
         margin-bottom: 4px;
+    }
+
+    .tracker-widget-header,
+    .tracker-live-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .tracker-widget-stats {
+        flex-direction: column;
     }
 }

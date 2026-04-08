@@ -13,10 +13,18 @@ export const updateEmployee = async (data) => {
 };
 
 export const getUserId = () => {
+    const stored = localStorage.getItem("userId");
+    if (stored) return Number(stored);
+
     const token = localStorage.getItem("token");
     if (!token) return null;
-    const decoded = jwtDecode(token);
-    return decoded.userId;
+    try {
+        const decoded = jwtDecode(token);
+        return decoded.userId ?? null;
+    } catch (e) {
+        console.error("Failed to decode token userId:", e);
+        return null;
+    }
 };
 
 export const getPositions = async () => {
@@ -43,5 +51,19 @@ export const updateProfile = async (profile) => {
     }
 };
 
+export const getAllEmployees = async () => {
+    try {
+        const response = await apiClient.get("/api/admin/employees");
+        return response.data;
+    } catch (err) {
+        try {
+            const fallbackResponse = await apiClient.get("/api/employees");
+            return fallbackResponse.data;
+        } catch (fallbackErr) {
+            console.error("Error fetching employees:", fallbackErr);
+            throw fallbackErr;
+        }
+    }
+};
 
 

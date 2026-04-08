@@ -11,6 +11,7 @@ import Tracker from "../pages/Tracker";
 import StatisticsPage from "../pages/StatisticsPage";
 import SettingsPage from "../pages/SettingsPage";
 import Messenger from "../pages/Messenger";
+import AchievementsPage from "../pages/AchievementsPage";
 
 export default function AppRoutes() {
     return (
@@ -73,6 +74,13 @@ export default function AppRoutes() {
                 <Route path="/messenger" element={
                     <ProtectedRoute>
                         <Messenger />
+                    </ProtectedRoute>
+                }
+                />
+
+                <Route path="/achievements" element={
+                    <ProtectedRoute>
+                        <AchievementsPage />
                     </ProtectedRoute>
                 }
                 />

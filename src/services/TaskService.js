@@ -3,11 +3,10 @@ import apiClient from "./ApiClient";
 export const retrieveAllTasks = (userId) =>
     apiClient.get(`/api/tasks/user/${userId}`);
 
-export const createTask = async (creatorUserId, assigneeEmployeeId, task) => {
-    console.log(task)
+export const createTask = async (creatorUserId, assigneeEmployeeId, projectId, task) => {
     try {
         const response = await apiClient.post(
-            `/api/tasks/user/${creatorUserId}/assign/${assigneeEmployeeId}`,
+            `/api/tasks/user/${creatorUserId}/assign/${assigneeEmployeeId}/project/${projectId}`,
             task
         );
         return response.data;

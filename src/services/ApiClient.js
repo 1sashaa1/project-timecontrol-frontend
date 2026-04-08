@@ -1,6 +1,7 @@
 import axios from "axios";
 
 const API_BASE_URL = "http://localhost:8080";
+let refreshPromise = null;
 
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
@@ -19,24 +20,27 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
-        if (error.response && error.response.status === 401) {
+        const originalRequest = error.config;
+        if (error.response && error.response.status === 401 && !originalRequest?._retry) {
+            originalRequest._retry = true;
             try {
-                const refreshToken = localStorage.getItem("refresh");
-                if (!refreshToken) throw new Error("No refresh token");
+                if (!refreshPromise) {
+                    const refreshToken = localStorage.getItem("refresh");
+                    if (!refreshToken) throw new Error("No refresh token");
+                    refreshPromise = axios.post(`${API_BASE_URL}/api/auth/refresh`, { refreshToken });
+                }
 
-                const res = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {
-                    refreshToken, // проверь, какое поле сервер ждёт
-                });
+                const res = await refreshPromise;
+                refreshPromise = null;
 
                 const newToken = res.data.accessToken;
-                console.log(newToken)
                 localStorage.setItem("token", newToken);
-
-                error.config.headers["Authorization"] = "Bearer " + newToken;
-                return apiClient.request(error.config);
+                originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
+                return apiClient.request(originalRequest);
             } catch (refreshErr) {
+                refreshPromise = null;
                 localStorage.clear();
-                window.location.href = "/login";
+                window.location.href = "/";
             }
         }
         return Promise.reject(error);

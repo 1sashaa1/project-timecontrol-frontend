@@ -3,7 +3,7 @@ import RegisterForm from "../components/RegisterForm";
 
 function RegisterPage() {
     return (
-        <div>
+        <div className="auth-page">
             <RegisterForm />
         </div>
     );

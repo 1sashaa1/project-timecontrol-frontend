@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
     searchEmployeesApi,
     loadDialogsApi,
@@ -16,23 +16,37 @@ export default function Messenger() {
     const userId = getUserId();
     const [query, setQuery] = useState("");
     const [searchResults, setSearchResults] = useState([]);
+    const [searchLoading, setSearchLoading] = useState(false);
 
     const [dialogs, setDialogs] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null);
+    const selectedUserRef = useRef(null);
 
     const [messages, setMessages] = useState([]);
     const [text, setText] = useState("");
 
     const [stompClient, setStompClient] = useState(null);
-    const subscriptionRef = useRef(null); // Подписка на конкретный диалог
     const messagesEndRef = useRef(null); // Для автоскролла
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
+    const getDisplayName = (entity) =>
+        `${entity?.employee?.surname ?? entity?.surname ?? ""} ${entity?.employee?.name ?? entity?.name ?? ""}`.trim() || "Пользователь";
+
+    const isInCurrentDialog = useCallback((msg, currentUserId, companionId) => {
+        const senderId = msg?.sender?.id;
+        const receiverId = msg?.receiver?.id;
+        if (!senderId || !receiverId || !companionId) return false;
+        return (
+            (senderId === currentUserId && receiverId === companionId) ||
+            (senderId === companionId && receiverId === currentUserId)
+        );
+    }, []);
 
     useEffect(() => {
+        if (!userId) return;
         const socket = new SockJS("http://localhost:8080/ws"); // URL твоего SockJS endpoint
         const client = new Client({
             // Используем SockJS для совместимости с браузером
@@ -42,8 +56,29 @@ export default function Messenger() {
 
         // onConnect вызывается после успешного соединения
         client.onConnect = () => {
-            console.log("WS Connected");
             setStompClient(client);
+            client.subscribe("/topic/messages", (frame) => {
+                const message = JSON.parse(frame.body);
+                const companion = selectedUserRef.current;
+
+                if (companion && isInCurrentDialog(message, userId, companion.id)) {
+                    setMessages((prev) => {
+                        if (message.messageId && prev.some((m) => m.messageId === message.messageId)) return prev;
+                        const normalized = {
+                            ...message,
+                            timestamp: parseSentAt(message.sentAt)
+                        };
+                        return [...prev, normalized];
+                    });
+                }
+
+                setDialogs((prev) => {
+                    const otherUser = message.sender?.id === userId ? message.receiver : message.sender;
+                    if (!otherUser?.id) return prev;
+                    if (prev.some((d) => d.id === otherUser.id)) return prev;
+                    return [otherUser, ...prev];
+                });
+            });
         };
 
         // Обработка ошибок
@@ -53,7 +88,7 @@ export default function Messenger() {
 
         client.activate(); // Важно: запускаем клиент
         return () => client.deactivate(); // Очистка при размонтировании
-    }, []);
+    }, [isInCurrentDialog, userId]);
 
 
     function parseSentAt(sentAtArray) {
@@ -63,11 +98,8 @@ export default function Messenger() {
     }
 
 
-    useEffect(() => {
-        loadUserDialogs();
-    }, []);
-
-    const loadUserDialogs = async () => {
+    const loadUserDialogs = useCallback(async () => {
+        if (!userId) return;
         try {
             const res = await loadDialogsApi(userId);
 
@@ -82,46 +114,50 @@ export default function Messenger() {
         } catch (err) {
             console.error(err);
         }
-    };
+    }, [userId]);
 
-    const searchEmployees = async () => {
-        if (query.trim() === "") {
+    useEffect(() => {
+        loadUserDialogs();
+    }, [loadUserDialogs]);
+
+    useEffect(() => {
+        const q = query.trim();
+        if (!q) {
             setSearchResults([]);
             return;
         }
-        try {
-            const res = await searchEmployeesApi(query);
-            setSearchResults(res.data);
-        } catch (e) {
-            console.error(e);
-        }
-    };
+        const timeout = setTimeout(async () => {
+            setSearchLoading(true);
+            try {
+                const res = await searchEmployeesApi(q);
+                setSearchResults(Array.isArray(res.data) ? res.data : []);
+            } catch (e) {
+                console.error(e);
+            } finally {
+                setSearchLoading(false);
+            }
+        }, 250);
+        return () => clearTimeout(timeout);
+    }, [query]);
 
     const openDialog = async (user) => {
-        if (subscriptionRef.current) {
-            subscriptionRef.current.unsubscribe();
-        }
-
         setSelectedUser(user);
+        selectedUserRef.current = user;
 
         // Подгружаем сообщения
-        const res = await loadDialogMessagesApi(userId, user.id);
-        const normalized = res.data.map(m => ({ ...m, timestamp: parseSentAt(m.sentAt) }));
-        setMessages(normalized);
+        try {
+            const res = await loadDialogMessagesApi(userId, user.id);
+            const normalized = (Array.isArray(res.data) ? res.data : [])
+                .map(m => ({ ...m, timestamp: parseSentAt(m.sentAt) }));
+            setMessages(normalized);
+        } catch (e) {
+            console.error(e);
+            setMessages([]);
+        }
 
         // Если пользователя нет в списке диалогов — добавляем
         if (!dialogs.find(d => d.id === user.id)) {
             setDialogs(prev => [...prev, user]);
-        }
-
-        // Подписка на WS
-        if (stompClient) {
-            const topic = `/topic/dialog/${userId}_${user.id}`;
-            const sub = stompClient.subscribe(topic, (msg) => {
-                const message = JSON.parse(msg.body);
-                setMessages(prev => [...prev, message]);
-            });
-            subscriptionRef.current = sub;
         }
 
         setSearchResults([]);
@@ -131,28 +167,17 @@ export default function Messenger() {
 
     const sendMessage = () => {
         if (!text.trim() || !selectedUser || !stompClient) return;
-console.log(selectedUser)
+
         const payload = {
             senderId: userId,
             receiverId: selectedUser.id,
             content: text,
-            timestamp: new Date().toISOString(),
-            sender: { id: userId, surname: "Вы", name: "" }
+            timestamp: new Date().toISOString()
         };
-        const getDialogTopic = (id1, id2) => {
-            const [a, b] = [id1, id2].sort((x, y) => x - y);
-            return `/topic/dialog/${a}_${b}`;
-        };
-
-// Подписка
-        const topic = getDialogTopic(userId, selectedUser.id);
-
         stompClient.publish({
             destination: "/app/chat.send",
             body: JSON.stringify(payload),
         });
-
-        setMessages(prev => [...prev, payload]);
         setText("");
     };
 
@@ -171,15 +196,15 @@ console.log(selectedUser)
                     className="searchInput"
                     placeholder="Введите фамилию..."
                     onChange={(e) => setQuery(e.target.value)}
-                    onKeyUp={searchEmployees}
                 />
+                {searchLoading && <div className="searchHint">Поиск...</div>}
                 {searchResults.map((emp) => (
                     <div
                         key={emp.id}
                         className="item"
                         onClick={() => openDialog(emp)}
                     >
-                        {emp.surname} {emp.name}
+                        {getDisplayName(emp)}
                     </div>
                 ))}
 
@@ -188,10 +213,10 @@ console.log(selectedUser)
                     {dialogs.map(user => (
                         <div
                             key={user.id}
-                            className="dialogItem"
+                            className={`dialogItem ${selectedUser?.id === user.id ? "active" : ""}`}
                             onClick={() => openDialog(user)}
                         >
-                            {user.employee?.surname} {user.employee?.name}
+                            {getDisplayName(user)}
                         </div>
                     ))}
 
@@ -200,8 +225,8 @@ console.log(selectedUser)
             <div className="chatArea">
                 {selectedUser ? (
                     <>
-                        <h3 style={{marginLeft: 10}}>
-                            Диалог с {selectedUser.employee?.surname} {selectedUser.employee?.name}
+                        <h3 className="chatTitle">
+                            Диалог с {getDisplayName(selectedUser)}
                         </h3>
 
                         <div className="messagesBox">
@@ -214,7 +239,7 @@ console.log(selectedUser)
                                 >
                                     <div className="message-meta">
                 <span className="message-author">
-                    {m.sender.surname} {m.sender.name}
+                    {getDisplayName(m.sender)}
                 </span>
                                         <span className="message-time">
                     {new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}

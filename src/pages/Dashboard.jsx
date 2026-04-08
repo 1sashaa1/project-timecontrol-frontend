@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useCallback } from "react";
+import React, { useEffect, useState, useContext, useCallback, useRef } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 import TaskList from "../components/TaskList";
 import TaskForm from "../components/TaskForm";
@@ -8,7 +8,7 @@ import {
     updateStatus,
     deleteTask, updateTask
 } from "../services/TaskService";
-import { getUserId } from "../services/EmployeeService";
+import {getAllEmployees, getUserId} from "../services/EmployeeService";
 import "../css/Dashboard.css";
 import * as XLSX from "xlsx";
 import Sidebar from "../components/Sidebar";
@@ -19,6 +19,7 @@ import RobotoMedium from "../font/Roboto-Medium.js";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import autoTable from "jspdf-autotable";
+import {createProject, getAllProjects} from "../services/ProjectService";
 
 function Dashboard() {
     const { logout } = useContext(AuthContext);
@@ -32,20 +33,30 @@ function Dashboard() {
     const [dateTo, setDateTo] = useState("");
     const { showToast } = useToast();
     const [editingTask, setEditingTask] = useState(null);
+    const [projects, setProjects] = useState([]);
+    const [projectName, setProjectName] = useState("");
+    const [employees, setEmployees] = useState([]);
+    const lastTasksRequestRef = useRef(0);
 
     const userId = getUserId();
 
     const fetchTasks = useCallback(async () => {
+        if (!userId) return;
+        const requestId = Date.now();
+        lastTasksRequestRef.current = requestId;
         setLoading(true);
         try {
             const response = await retrieveAllTasks(userId);
             const tasksArray = Array.isArray(response.data) ? response.data : [];
-            setTasks(tasksArray);
+            if (lastTasksRequestRef.current === requestId) {
+                setTasks(tasksArray);
+            }
         } catch (err) {
             console.error("Error fetching tasks:", err);
-            setTasks([]);
         } finally {
-            setLoading(false);
+            if (lastTasksRequestRef.current === requestId) {
+                setLoading(false);
+            }
         }
     }, [userId]);
 
@@ -60,6 +71,21 @@ function Dashboard() {
         }
     }, [tasks, loading]);
 
+    const fetchProjects = useCallback(async () => {
+        try {
+            const response = await getAllProjects();
+            const projectsArray = Array.isArray(response.data) ? response.data : [];
+            setProjects(projectsArray);
+        } catch (err) {
+            console.error("Error fetching projects:", err);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchProjects();
+    }, [fetchProjects]);
+
+
     const handleCreateOrUpdate = async (task) => {
         if (editingTask) {
             if (!window.confirm("Сохранить изменения задачи?")) return;
@@ -67,20 +93,23 @@ function Dashboard() {
                 await updateTask(task, editingTask.id);
                 fetchTasks();
                 showToast("Задача успешно обновлена!", "success");
-                setEditingTask(null); // сброс состояния редактирования
+                setEditingTask(null);
             } catch (err) {
                 showToast("Ошибка при обновлении задачи", "error");
-                console.error("Error updating task:", err);
             }
         } else {
             if (!window.confirm("Создать задачу?")) return;
             try {
-                await createTask(userId, userId, task);
+                await createTask(
+                    userId,
+                    task.assigneeId,
+                    task.projectId,
+                    task
+                );
                 fetchTasks();
                 showToast("Задача успешно создана!", "success");
             } catch (err) {
                 showToast("Ошибка при создании задачи", "error");
-                console.error("Error creating task:", err);
             }
         }
     };
@@ -187,6 +216,45 @@ function Dashboard() {
             return matchesSearch && matchesStatus && matchesPriority && matchesDate;
         });
 
+    useEffect(() => {
+        const fetchEmployees = async () => {
+            try {
+                const response = await getAllEmployees(); // API вызов
+                setEmployees(response);
+            } catch (err) {
+                console.error("Ошибка загрузки сотрудников", err);
+            }
+        };
+        fetchEmployees();
+    }, []);
+
+    const handleCreateProject = async (e) => {
+        e.preventDefault();
+
+        if (!projectName.trim()) {
+            alert("Введите название проекта");
+            return;
+        }
+
+        try {
+            await createProject({
+                projectName,
+                status: "planned"
+            });
+
+            fetchProjects();
+            setProjectName("");
+            showToast("Проект создан", "success");
+
+        } catch (err) {
+            showToast("Ошибка создания проекта", "error");
+        }
+    };
+
+    const totalTasks = tasks.length;
+    const doneTasks = tasks.filter(task => task.status === "done").length;
+    const inProgressTasks = tasks.filter(task => task.status === "in_progress").length;
+    const completionRate = totalTasks ? Math.round((doneTasks / totalTasks) * 100) : 0;
 
     return (
         <div className="dashboard-layout">
@@ -194,20 +262,63 @@ function Dashboard() {
 
             <div className="dashboard-container">
                 <header className="dashboard-header">
-                    <h1>Панель управления задачами</h1>
-                    <button className="logout-btn" onClick={logout}>
-                        Выйти из системы
-                    </button>
-                    {isAdmin() && (
-                        <button className="admin-btn" onClick={() => navigate("/admin")}>
-                            Панель администратора
+                    <div className="dashboard-title-group">
+                        <h1>Панель управления задачами</h1>
+                        <p>Планируйте, отслеживайте и закрывайте задачи команды</p>
+                    </div>
+
+                    <div className="dashboard-actions">
+                        {isAdmin() && (
+                            <button className="admin-btn" onClick={() => navigate("/admin")}>
+                                Панель администратора
+                            </button>
+                        )}
+                        <button className="logout-btn" onClick={logout}>
+                            Выйти
                         </button>
-                    )}
+                    </div>
                 </header>
 
+                <section className="dashboard-stats">
+                    <div className="stat-card">
+                        <span className="stat-label">Всего задач</span>
+                        <strong>{totalTasks}</strong>
+                    </div>
+                    <div className="stat-card">
+                        <span className="stat-label">В работе</span>
+                        <strong>{inProgressTasks}</strong>
+                    </div>
+                    <div className="stat-card">
+                        <span className="stat-label">Завершено</span>
+                        <strong>{doneTasks}</strong>
+                    </div>
+                    <div className="stat-card">
+                        <span className="stat-label">Прогресс</span>
+                        <strong>{completionRate}%</strong>
+                    </div>
+                </section>
+
+                <form className="project-form" onSubmit={handleCreateProject}>
+                    <input
+                        type="text"
+                        className="project-input"
+                        placeholder="Название нового проекта"
+                        value={projectName}
+                        onChange={e => setProjectName(e.target.value)}
+                    />
+                    <button className="project-create-btn" type="submit">Создать проект</button>
+                </form>
+
                 <section className="task-section">
-                    <TaskForm onCreate={handleCreateOrUpdate}
-                              editingTask={editingTask}
+
+                    {projects.length === 0 && (
+                        <p className="no-projects">Нет доступных проектов. Создайте проект или проверьте права доступа.</p>
+                    )}
+                    <TaskForm
+                        onCreate={handleCreateOrUpdate}
+                        editingTask={editingTask}
+                        projects={projects}
+                        employees={employees}
                     />
 
                     <div className="filters-container">
@@ -284,10 +395,12 @@ function Dashboard() {
                         />
                     )}
                 </section>
-                <button className="status-btn done" onClick={exportToExcel}>Скачать отчёт (Excel)</button>
-                <button onClick={exportToPDF} className="status-btn done">
-                    Экспорт в PDF
-                </button>
+                <div className="export-actions">
+                    <button className="status-btn done" onClick={exportToExcel}>Скачать отчёт (Excel)</button>
+                    <button onClick={exportToPDF} className="status-btn done">
+                        Экспорт в PDF
+                    </button>
+                </div>
             </div>
         </div>
     );

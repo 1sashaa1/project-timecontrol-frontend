@@ -1,9 +1,11 @@
-import {useEffect, useRef, useState} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 import {
     startTimer,
     pauseTimer,
     resumeTimer,
     stopTimer,
+    addManualTime,
+    getTrackerState,
     getTodayReport,
     getTaskTotals
 } from "../services/TimeServise";
@@ -20,29 +22,11 @@ export default function TimeTrackerEnhanced({ employeeId, taskId, onTotalsUpdate
     const [paused, setPaused] = useState(false);
     const [elapsedSec, setElapsedSec] = useState(0);
     const [todayHours, setTodayHours] = useState(0);
+    const [taskTotalMinutes, setTaskTotalMinutes] = useState(0);
     const [trackId, setTrackId] = useState(null);
+    const [manualMinutes, setManualMinutes] = useState("");
 
     const timer = useRef(null);
-
-    // === LOCAL STORAGE restore ===
-    useEffect(() => {
-        const saved = localStorage.getItem(`track:${employeeId}:${taskId}`);
-        if (saved) {
-            const p = JSON.parse(saved);
-            setRunning(p.running);
-            setPaused(p.paused);
-            setElapsedSec(p.elapsedSec);
-            setTrackId(p.trackId);
-        }
-    }, [employeeId, taskId]);
-
-    // === LOCAL STORAGE save ===
-    useEffect(() => {
-        localStorage.setItem(
-            `track:${employeeId}:${taskId}`,
-            JSON.stringify({ running, paused, elapsedSec, trackId })
-        );
-    }, [running, paused, elapsedSec, trackId, employeeId, taskId]);
 
     // === TIMER ===
     useEffect(() => {
@@ -60,13 +44,6 @@ export default function TimeTrackerEnhanced({ employeeId, taskId, onTotalsUpdate
         };
     }, [running, paused]);
 
-    // === fetch stats ===
-    useEffect(() => {
-        if (!employeeId) return;
-        fetchToday();
-        fetchTotals();
-    }, [employeeId, taskId]);
-
     async function fetchToday() {
         try {
             const res = await getTodayReport(employeeId);
@@ -76,16 +53,36 @@ export default function TimeTrackerEnhanced({ employeeId, taskId, onTotalsUpdate
         }
     }
 
-    async function fetchTotals() {
+    const fetchTotals = useCallback(async () => {
         try {
             const res = await getTaskTotals(employeeId);
             const map = {};
             res.data.forEach(t => map[t.taskId] = t.totalMinutes);
             onTotalsUpdate?.(map);
+            setTaskTotalMinutes(Number(map[taskId] || 0));
         } catch (e) {
             console.error(e);
         }
-    }
+    }, [employeeId, onTotalsUpdate, taskId]);
+
+    const syncState = useCallback(async () => {
+        if (!employeeId || !taskId) return;
+        try {
+            const { data } = await getTrackerState(taskId, employeeId);
+            setRunning(Boolean(data.running));
+            setPaused(false);
+            setTrackId(data.trackId ?? null);
+            setElapsedSec(Number(data.openElapsedSeconds || 0));
+            setTodayHours(Number(data.todayHours || 0));
+            await fetchTotals();
+        } catch (e) {
+            console.error(e);
+        }
+    }, [employeeId, taskId, fetchTotals]);
+
+    useEffect(() => {
+        syncState();
+    }, [syncState]);
 
     // === CONTROL ACTIONS ===
 
@@ -95,6 +92,7 @@ export default function TimeTrackerEnhanced({ employeeId, taskId, onTotalsUpdate
             setTrackId(res.data.trackId);
             setRunning(true);
             setPaused(false);
+            setElapsedSec(0);
         } catch (e) {
             alert("Ошибка старта");
         }
@@ -104,6 +102,8 @@ export default function TimeTrackerEnhanced({ employeeId, taskId, onTotalsUpdate
         try {
             await pauseTimer(taskId, employeeId);
             setPaused(true);
+            await fetchToday();
+            await fetchTotals();
         } catch (e) {
             alert("Ошибка паузы");
         }
@@ -127,27 +127,49 @@ export default function TimeTrackerEnhanced({ employeeId, taskId, onTotalsUpdate
             setPaused(false);
             setElapsedSec(0);
             setTrackId(null);
-            fetchToday();
-            fetchTotals();
+            await fetchToday();
+            await fetchTotals();
         } catch (e) {
             alert("Ошибка остановки");
         }
     }
 
+    async function handleManualAdd() {
+        const minutes = Number(manualMinutes);
+        if (!Number.isInteger(minutes) || minutes <= 0) {
+            alert("Введите корректное количество минут");
+            return;
+        }
+        try {
+            await addManualTime(taskId, employeeId, minutes);
+            setManualMinutes("");
+            await fetchToday();
+            await fetchTotals();
+        } catch (e) {
+            alert("Ошибка добавления времени");
+        }
+    }
+
     return (
-        <div className="p-4 bg-white shadow-md rounded-xl max-w-md">
-            <div className="flex justify-between">
-                <h3 className="text-lg font-semibold">Таймер задачи #{taskId}</h3>
-                <div className="text-right">
-                    <div className="text-xs text-gray-500">Сегодня, часов</div>
-                    <div className="text-xl font-bold">{todayHours.toFixed(2)}</div>
+        <div className="tracker-widget">
+            <div className="tracker-widget-header">
+                <h3 className="tracker-widget-title">Таймер задачи #{taskId}</h3>
+                <div className="tracker-widget-stats">
+                    <div className="tracker-widget-stat">
+                        <span>Сегодня</span>
+                        <strong>{formatHMS(Math.round(todayHours * 3600))}</strong>
+                    </div>
+                    <div className="tracker-widget-stat">
+                        <span>Всего по задаче</span>
+                        <strong>{formatHMS(taskTotalMinutes * 60)}</strong>
+                    </div>
                 </div>
             </div>
 
-            <div className="mt-4 flex items-center justify-between">
-                <div className="text-3xl font-mono">{formatHMS(elapsedSec)}</div>
+            <div className="tracker-live-row">
+                <div className="tracker-live-time">{formatHMS(elapsedSec)}</div>
 
-                <div className="flex gap-2">
+                <div className="tracker-actions">
                     {!running && (
                         <button className="btn green" onClick={handleStart}>Start</button>
                     )}
@@ -163,6 +185,21 @@ export default function TimeTrackerEnhanced({ employeeId, taskId, onTotalsUpdate
                             <button className="btn red" onClick={handleStop}>Stop</button>
                         </>
                     )}
+                </div>
+            </div>
+            {trackId && <div className="tracker-session">Session #{trackId}</div>}
+            <div className="tracker-manual">
+                <div className="tracker-manual-label">Добавить время вручную (минуты)</div>
+                <div className="tracker-manual-row">
+                    <input
+                        type="number"
+                        min="1"
+                        value={manualMinutes}
+                        onChange={(e) => setManualMinutes(e.target.value)}
+                        className="tracker-manual-input"
+                        placeholder="Например: 30"
+                    />
+                    <button className="btn blue" onClick={handleManualAdd}>Добавить</button>
                 </div>
             </div>
         </div>

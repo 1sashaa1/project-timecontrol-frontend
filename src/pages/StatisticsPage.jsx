@@ -3,27 +3,25 @@ import { groupBy } from "lodash";
 import { getUserId } from "../services/EmployeeService";
 
 import {
-    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from "recharts";
 import {retrieveAllTasks} from "../services/TaskService";
 import Sidebar from "../components/Sidebar";
+import "../css/StatisticsPage.css";
 
 function StatisticsPage() {
 
     const [tasks, setTasks] = useState([]);
-    const [loading, setLoading] = useState(true);
     const userId = getUserId();
 
     useEffect(() => {
         const fetchTasks = async () => {
-            setLoading(true);
+            if (!userId) return;
             try {
                 const response = await retrieveAllTasks(userId);
                 setTasks(Array.isArray(response.data) ? response.data : []);
             } catch (err) {
                 console.error(err);
-            } finally {
-                setLoading(false);
             }
         };
 
@@ -90,76 +88,80 @@ function StatisticsPage() {
     const monthData = getTasksByMonth(tasks);
     const weekData = getTasksByWeek(tasks);
 
-    const chartStyle = { background: "#1f1f1f", padding: 20, borderRadius: 10, color: "#fff", marginBottom: 30 };
-
     return (
         <div className="dashboard-layout">
             <Sidebar/>
             <div className="dashboard-container">
-        <div className="statistics-panel" style={{ padding: 20, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20 }}>
-            <div style={chartStyle}>
+        <div className="statistics-page">
+            <div className="statistics-header">
+                <h1>Статистика задач</h1>
+                <p>Основные срезы по статусам, приоритетам и периодам</p>
+            </div>
+            <div className="statistics-grid">
+            <div className="chart-card">
                 <h3>Задачи по статусу</h3>
                 <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={statusData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#555"/>
-                        <XAxis dataKey="status" stroke="#fff"/>
-                        <YAxis stroke="#fff"/>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#dfe1e6"/>
+                        <XAxis dataKey="status" stroke="#42526e"/>
+                        <YAxis stroke="#42526e"/>
                         <Tooltip />
                         <Bar dataKey="count" fill="#4caf50" />
                     </BarChart>
                 </ResponsiveContainer>
             </div>
 
-            <div style={chartStyle}>
+            <div className="chart-card">
                 <h3>Задачи по приоритету</h3>
                 <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={priorityData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#555"/>
-                        <XAxis dataKey="priority" stroke="#fff"/>
-                        <YAxis stroke="#fff"/>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#dfe1e6"/>
+                        <XAxis dataKey="priority" stroke="#42526e"/>
+                        <YAxis stroke="#42526e"/>
                         <Tooltip />
                         <Bar dataKey="count" fill="#ff9800" />
                     </BarChart>
                 </ResponsiveContainer>
             </div>
 
-            <div style={chartStyle}>
+            <div className="chart-card">
                 <h3>Задачи по годам</h3>
                 <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={yearData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#555"/>
-                        <XAxis dataKey="year" stroke="#fff"/>
-                        <YAxis stroke="#fff"/>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#dfe1e6"/>
+                        <XAxis dataKey="year" stroke="#42526e"/>
+                        <YAxis stroke="#42526e"/>
                         <Tooltip />
                         <Bar dataKey="count" fill="#2196f3" />
                     </BarChart>
                 </ResponsiveContainer>
             </div>
 
-            <div style={chartStyle}>
+            <div className="chart-card">
                 <h3>Задачи по месяцам</h3>
                 <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={monthData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#555"/>
-                        <XAxis dataKey="month" stroke="#fff"/>
-                        <YAxis stroke="#fff"/>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#dfe1e6"/>
+                        <XAxis dataKey="month" stroke="#42526e"/>
+                        <YAxis stroke="#42526e"/>
                         <Tooltip />
                         <Bar dataKey="count" fill="#9c27b0" />
                     </BarChart>
                 </ResponsiveContainer>
             </div>
 
-            <div style={chartStyle}>
+            <div className="chart-card">
                 <h3>Задачи по неделям</h3>
                 <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={weekData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#555"/>
-                        <XAxis dataKey="week" stroke="#fff"/>
-                        <YAxis stroke="#fff"/>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#dfe1e6"/>
+                        <XAxis dataKey="week" stroke="#42526e"/>
+                        <YAxis stroke="#42526e"/>
                         <Tooltip />
                         <Bar dataKey="count" fill="#f44336" />
                     </BarChart>
                 </ResponsiveContainer>
+            </div>
             </div>
         </div>
         </div>
